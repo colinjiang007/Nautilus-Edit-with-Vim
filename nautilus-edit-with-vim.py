@@ -48,6 +48,7 @@ class NautilusEditWithVimExtension(GObject.GObject, Nautilus.MenuProvider):
         cf.add_section('cmds')
         cf.set('cmds', 'gvim', 'gvim')
         cf.set('cmds', 'gvimdiff', 'gvim -d')
+        cf.set('cmds', 'gvimremote', 'gvim --remote')
         cf.set('cmds', 'auth', 'gksu -k,beesu -m -c,kdesu -c')
         cf.add_section('prefs')
         # by default we don't fold menu items when right click on a single
@@ -61,6 +62,7 @@ class NautilusEditWithVimExtension(GObject.GObject, Nautilus.MenuProvider):
 
         self.gvim_cmd = cf.get('cmds', 'gvim')
         self.gvimdiff_cmd = cf.get('cmds', 'gvimdiff')
+        self.gvimremote_cmd = cf.get('cmds', 'gvimremote')
         self.auth_cmds = [cmd.strip()
                 for cmd in cf.get('cmds', 'auth').split(',')]
         self.pref_fold_single = cf.getboolean('prefs', 'fold_single')
@@ -95,6 +97,14 @@ class NautilusEditWithVimExtension(GObject.GObject, Nautilus.MenuProvider):
 
         self.__execute_as_root(cmd_string)
 
+    #edit with existing gvim
+    def menu_activate_cb_existing(self, menu, files):
+        cmd_string = self.gvimremote_cmd
+        for afile in files:
+            cmd_string += " '" + afile.get_location().get_path() + "'"
+
+        os.system(cmd_string)
+
     # edit with mutli gvim
     def menu_activate_cb_multi(self, menu, files):
         for afile in files:
@@ -121,6 +131,13 @@ class NautilusEditWithVimExtension(GObject.GObject, Nautilus.MenuProvider):
             items.append(new_item)
 
             new_item = Nautilus.MenuItem(
+                name = 'NautilusEditWithVim::nautilus_edit_with_existing_vim_file_item',
+                label = 'Edit with existing gVim',
+                tip = 'Edit with existing gVim Editor')
+            new_item.connect('activate', self.menu_activate_cb_existing, files)
+            items.append(new_item)
+
+            new_item = Nautilus.MenuItem(
                 name = 'NautilusEditWithVim::nautilus_edit_with_vim_file_item_root',
                 label = 'Edit with gVim as root',
                 tip = 'Edit with gVim Editor as root')
@@ -142,6 +159,13 @@ class NautilusEditWithVimExtension(GObject.GObject, Nautilus.MenuProvider):
                 tip = 'Edit with a Single gVim Editor as root')
             new_item.connect('activate', self.menu_activate_cb_single_root,
                     files)
+            items.append(new_item)
+
+            new_item = Nautilus.MenuItem(
+                name = 'NautilusEditWithVim::nautilus_edit_with_existing_vim_single_file_item',
+                label = 'Edit with an Existing gVim',
+                tip = 'Edit with an Existing gVim Editor')
+            new_item.connect('activate', self.menu_activate_cb_existing, files)
             items.append(new_item)
 
             new_item = Nautilus.MenuItem(
