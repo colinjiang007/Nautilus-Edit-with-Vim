@@ -9,6 +9,10 @@ the extension works on Nautilus 3.
 
 **NOTE**: If you are using Nautilus 2, please use the [nautilus-2 branch][].
 
+## My extension
+
+Add a new menu item "Edit with existing gVim" to Nautilus.
+
 ## Install
 
 To install this extension, first make sure that you have installed the
